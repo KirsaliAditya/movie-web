@@ -14,12 +14,3 @@ A modern movie discovery web app built with **React**, **Vite**, **Tailwind CSS*
 - 🎨 **Responsive UI:** Clean, mobile-friendly design.
 
 ---
-
-## Getting Started
-
-### 1. Clone the repository
-
-```sh
-git clone https://github.com/your-username/movie-web.git
-cd movie-web
-```
