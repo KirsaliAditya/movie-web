@@ -29,7 +29,7 @@ export const AISearch = ({ setSearchPrompt }) => {
         />
       </div>
     </div>
-    <button className='mt-2 p-1.5 text-xl rounded-xl text-white bg-slate-900 hover:bg-slate-700 cursor: pointer;' onClick={handleAISearch}>Search</button>
+    <button className='mt-2 p-1.5 text-xl rounded-xl text-white bg-dark-100 hover:bg-slate-700 cursor: pointer;' onClick={handleAISearch}>Search</button>
     </div>
   )
 }

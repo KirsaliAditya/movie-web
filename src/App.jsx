@@ -82,6 +82,32 @@ const App = () => {
     }
   }
 
+  const getMovieNameFromGemini = async(prompt) => {
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY; 
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+  const body = {
+    contents: [
+      {
+        parts: [
+          {
+            text: `Suggest a popular movie name for this request: "${prompt}". Only reply with the movie name.`
+          }
+        ]
+      }
+    ]
+  };
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+
+  const data = await response.json();
+  return data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
+}
+
   useEffect(() => {
     fetchMovies(debouncedSearchTerm);
   },[debouncedSearchTerm]);
@@ -165,32 +191,6 @@ const App = () => {
     </main>
   )
 
-}
-
-const getMovieNameFromGemini = async(prompt) => {
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY; 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-
-  const body = {
-    contents: [
-      {
-        parts: [
-          {
-            text: `Suggest a popular movie name for this request: "${prompt}". Only reply with the movie name.`
-          }
-        ]
-      }
-    ]
-  };
-
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  });
-
-  const data = await response.json();
-  return data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
 }
 
 export default App
