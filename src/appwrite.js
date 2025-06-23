@@ -12,7 +12,6 @@ const database = new Databases(client);
 
 export const updateMovie = async (searchTerm, movie) => {
 
-    console.log(DatabaseID, CollectionID, searchTerm, movie);
     try{
         const result = await database.listDocuments(DatabaseID, CollectionID, [
             Query.equal('searchTerm', searchTerm),

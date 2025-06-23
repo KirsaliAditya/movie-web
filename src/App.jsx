@@ -1,10 +1,11 @@
-import { use, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useDebounce } from 'react-use';
 import './App.css'
 import Search from './components/Search'
 import Spinner from './components/Spinner';
 import MovieCard from './components/MovieCard';
 import {getMovies, updateMovie} from './appwrite.js';
+import { AISearch } from './components/AISearch.jsx';
 
 // base url for TMDB API
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
@@ -23,6 +24,7 @@ const API_OPTIONS = {
 const App = () => {
 
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchPrompt, setSearchPrompt] = useState('');
   const [error, setError] = useState(null);
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(null);
@@ -39,7 +41,7 @@ const App = () => {
       setError(null);
 
       const endpoint = query?
-        `${TMDB_BASE_URL}/search/movie?query=${encodeURIComponent(query)} &sort_by=popularity.desc` :
+      `${TMDB_BASE_URL}/search/movie?query=${encodeURIComponent(query)} &sort_by=popularity.desc` :
       `${TMDB_BASE_URL}/discover/movie?sort_by=popularity.desc`;
 
       const response = await fetch(endpoint, API_OPTIONS);
@@ -88,6 +90,29 @@ const App = () => {
     fetchTrendingMovies();
   }, []);
 
+
+  useEffect(() => {
+    const aiSearch = async() => {
+      if (!searchPrompt) return;
+      setLoading(true);
+      setError(null);
+      try {
+        const movieName = await getMovieNameFromGemini(searchPrompt);
+        if (movieName) {
+          setSearchTerm(movieName);
+          await fetchMovies(movieName);
+        } else {
+          setError("AI could not suggest a movie. Try a different prompt.");
+        }
+      } catch (e) {
+        setError("AI search failed. Try again.");
+      } finally {
+        setLoading(false);
+      }
+    }
+    aiSearch();
+  }, [searchPrompt]);
+
   return (
     <main>
 
@@ -114,6 +139,8 @@ const App = () => {
         )}
           <h2>Find your favorite <span className='text-gradient'>Movies and TV shows</span></h2>
           <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+
+          <AISearch setSearchPrompt={setSearchPrompt} />
         </header>
 
         
@@ -138,6 +165,32 @@ const App = () => {
     </main>
   )
 
+}
+
+const getMovieNameFromGemini = async(prompt) => {
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY; 
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+  const body = {
+    contents: [
+      {
+        parts: [
+          {
+            text: `Suggest a popular movie name for this request: "${prompt}". Only reply with the movie name.`
+          }
+        ]
+      }
+    ]
+  };
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+
+  const data = await response.json();
+  return data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
 }
 
 export default App
