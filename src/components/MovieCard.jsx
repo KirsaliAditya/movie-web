@@ -1,9 +1,27 @@
 import React from 'react'
+import { useState } from 'react';
 
-const MovieCard = ({movie: {title, vote_average, poster_path, release_date, original_language}}) => {
+const MovieCard = ({movie: {title, vote_average, poster_path, release_date, original_language, overview}}) => {
+
+
+  const [showOverview, setShowOverview] = useState(false);
+
+  const handleToggle = () => {
+    setShowOverview(!showOverview);
+  }
+
   return (
     <div className='movie-card'>
-        <img src={poster_path ? `https://image.tmdb.org/t/p/w500/${poster_path}` : '/no-movie.png'} alt={title} />
+        <div className='cursor-pointer min-h-[250px] flex items-center justify-center' onClick={handleToggle}>
+            {showOverview ? (
+                <div className='text-gradient text-sm max-h-48 overflow-y-auto'>
+                  {overview || 'No overview available.'}
+                </div>
+            ) : (
+              <img src={poster_path ? `https://image.tmdb.org/t/p/w500/${poster_path}` : '/no-movie.png'} alt={title} />
+
+      )}
+        </div>
 
         <div className='mt-4'>
             <h3>{title}</h3>
